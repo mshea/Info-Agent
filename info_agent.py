@@ -1,5 +1,5 @@
 # Info Agent
-# Last Updated 9 February 2013
+# Last Updated 16 February 2013
 #
 # This program filters news from a set of Twitter accounts and Reddit 
 # so you can get the most important news of the day and the week. 
