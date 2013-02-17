@@ -1,5 +1,5 @@
 # Info Agent
-# Last Updated 16 February 2013
+# Last Updated 17 February 2013
 #
 # This program filters news from a set of Twitter accounts and Reddit 
 # so you can get the most important news of the day and the week. 
@@ -57,6 +57,7 @@ twitter_account_data = [
 	}
 ]
 
+
 def import_reddit(reddit_data):
 	try:
 		d = urllib2.urlopen(reddit_data[1]).read()
@@ -83,7 +84,7 @@ def import_twitter(account_data):
 	api = tweepy.API(auth)
 
 	tweet_data = []
-	for tweet in api.home_timeline(count=100, include_rts=0):
+	for tweet in api.home_timeline(count=100, include_rts=1):
 		source = tweet.user.screen_name
 		date = str(tweet.created_at).replace(' ','T')
 		text = tweet.text
