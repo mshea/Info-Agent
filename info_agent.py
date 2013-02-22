@@ -85,30 +85,25 @@ def import_twitter(account_data):
 
 	tweet_data = []
 	for tweet in api.home_timeline(count=100, include_rts=1):
-		source = tweet.user.screen_name
-		date = str(tweet.created_at).replace(' ','T')
-		text = tweet.text
-		# Code to grab URLs. We're only using the first one
-		urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|'\
-				'[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', tweet.text)
 		try:
-			url = urls[0]
-			text = text.replace(url, '').strip()
-			if text == '': text = url
-		except IndexError:
+			url = tweet.entities['urls'][0]['expanded_url']
+			source = tweet.user.screen_name
+			date = str(tweet.created_at).replace(' ','T')
+			text = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|'\
+				'[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+','', tweet.text)
+			retweets = tweet.retweet_count * 1.0 # Create float
+			followers = tweet.user.followers_count * 1.0 # Create float
+			if retweets < 2:
+				score = 0
+			else:
+				retweets -= 1 # lower score for low-follower users
+				retweet_score = pow(retweets, 1.5) # boost retweets
+				raw_score = (retweet_score / followers)*100000 # Build score
+				score = round(math.log(raw_score, 1.09)) # Smooth out score
+			if (score > 0 and url != '0'):
+				tweet_data.append((source, text, url, date, score))
+		except:
 			url = False
-		retweets = tweet.retweet_count * 1.0 # Create float
-		followers = tweet.user.followers_count * 1.0 # Create float
-		if retweets < 2:
-			score = 0
-		else:
-			retweets -= 1 # lower score for low-follower users
-			retweet_score = pow(retweets, 1.5) # boost retweets
-			raw_score = (retweet_score / followers)*100000 # Build raw score
-			score = round(math.log(raw_score, 1.09)) # Smooth out high and low
-
-		if (url and score > 0):
-			tweet_data.append((source, text, url, date, score))
 	return tweet_data
 
 def export_to_sqlite(data, db_file):
